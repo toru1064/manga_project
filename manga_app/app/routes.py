@@ -1,4 +1,4 @@
-from flask import Blueprint, render_templates, request
+from flask import Blueprint, render_template, request
 
 bp = Blueprint('main', __name__)
 
@@ -7,15 +7,11 @@ post = []
 
 @bp.route("/", methods=["GET", "POST"])
 def index():
+    global posts
     if request.method == "POST":
         title = request.form["title"]
         review = request.form["review"]
         rating = request.form["rating"]
+        posts.append({"title": title, "review": review, "rating": rating})
 
-        posts.append({
-            "title": title,
-            "review": review,
-            "rating": rating
-        })
-
-    return render_templates("index.html", posts=posts)
+    return render_template("index.html", posts=posts)
