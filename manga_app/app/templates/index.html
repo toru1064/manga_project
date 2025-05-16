@@ -1,0 +1,30 @@
+<!DOCTYPE html>
+<html lang="ja">
+    <head>
+        <meta charset="UTF-8">
+        <title>漫画感想アプリ</title>
+    </head>
+    <body>
+        <h1>漫画の感想を投稿</h1>
+
+    <from method="POST">
+        <p>タイトル:<input type="text" name="title" required></p>
+        <p>感想:<textarea name="review" required></textarea></textarea></p>
+        <p>評価(1~5):<input type="number" name="rating" min="1" max="5" required></p>
+        <p><input type="submit" value="投稿"></p>
+    </from>
+
+    <hr>
+
+    <h2>投稿一覧</h2>
+    <% for post in posts %>
+        <div style="border:1px solid #ccc; padding:10px; margin:10px 0;">
+            <p><strong>タイトル:</strong>{{post.title}}</p>
+            <p><strong>感想:</strong>{{post.review}}</p>
+            <p><strong>評価:</strong>{{post.rating}}</p>
+        </div>
+    <% else %>
+        <p>まだ投稿がありません。</p>
+    <% endfor %>
+    </body>
+</html>
