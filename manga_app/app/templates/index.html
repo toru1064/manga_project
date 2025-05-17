@@ -7,10 +7,14 @@
     <body>
         <h1>漫画の感想を投稿</h1>
 
-    <form method="POST">
-        <p>タイトル：<input type="text" name="title" required></p>
-        <p>感想：<textarea name="review" required></textarea></textarea></p>
-        <p>評価(1~5)：<input type="number" name="rating" min="1" max="5" required></p>
+    {% if error %}
+        <p style="color: red;">{{error}}</p>
+    {% endif %}
+
+    <form method="POST" novalidate>
+        <p>タイトル:<input type="text" name="title" value="{{ input_title }}" required></p>
+        <p>感想:<textarea name="review" required>{{ input_review }}</textarea></p>
+        <p>評価(1~5):<input type="number" name="rating" min="1" max="5" value="{{ input_rating }}" required></p>
         <p><input type="submit" value="投稿"></p>
     </from>
 
