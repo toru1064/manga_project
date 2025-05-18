@@ -1,4 +1,4 @@
-from flask import Blueprint, render_template, request
+from flask import Blueprint, render_template, request, redirect, url_for
 from app.models import db, Book
 
 bp = Blueprint('main', __name__)
@@ -29,7 +29,39 @@ def index():
             review = ""
             rating = ""
 
-    #データベースから全権取得
-    books = Book.query.all()
+    #検索処理しデータベースから取得
+    keyword = request.args.get("keyword", "")
+    if keyword:
+        books = Book.query.filter(Book.title.contains(keyword)).all()
+    else:
+        books = Book.query.all()
+
     return render_template("index.html", posts=books, error=error,
                            input_title=title, input_review=review, input_rating=rating)
+
+
+@bp.route("/delete/<int:id>", methods=["POST"])
+def delete(id):
+    book = Book.query.get(id)
+    if book:
+        db.session.delete(book)
+        db.session.commit()
+    return redirect("/")
+
+@bp.route("/edit/<int:id>", methods=["GET", "POST"])
+def edit(id):
+    book = Book.query.get(id)
+    if not book:
+        return redirect("/")
+
+    return render_template("edit.html", book=book)
+
+@bp.route("/update/<int:id>", methods=["POST"])
+def update(id):
+    book = Book.query.get(id)
+    if book:
+        book.title = request.form["title"]
+        book.review = request.form["review"]
+        book.rating = request.form["rating"]
+        db.session.commit()
+    return redirect(url_for("main.index"))

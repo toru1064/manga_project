@@ -7,24 +7,37 @@
     <body>
         <h1>漫画の感想を投稿</h1>
 
-    {% if error %}
-        <p style="color: red;">{{error}}</p>
-    {% endif %}
+        <h2>漫画を検索</h2>
+        <form method="GET" action="{{ url_for('main.index') }}">
+            <input type="text" name="keyword" placeholder="キーワードを入力" value="{{ request.args.get('keyword', '') }}">
+            <input type="submit" value="検索">
+        </form>
+        <hr>
 
-    <form method="POST" novalidate>
-        <p>タイトル:<input type="text" name="title" value="{{ input_title }}" required></p>
-        <p>感想:<textarea name="review" required>{{ input_review }}</textarea></p>
-        <p>評価(1~5):<input type="number" name="rating" min="1" max="5" value="{{ input_rating }}" required></p>
-        <p><input type="submit" value="投稿"></p>
-    </from>
+        {% if error %}
+            <p style="color: red;">{{error}}</p>
+        {% endif %}
 
-    <hr>
+        <form method="POST">
+            <p>タイトル:<input type="text" name="title" value="{{ input_title }}" required></p>
+            <p>感想:<textarea name="review" required>{{ input_review }}</textarea></p>
+            <p>評価(1~5):<input type="number" name="rating" min="1" max="5" value="{{ input_rating }}" required></p>
+            <p><input type="submit" value="投稿"></p>
+        </form>
 
-    <h2>投稿一覧</h2>
-    {% for post in posts %}
-        <p>タイトル: {{ post.title }}</p>
-        <p>感想: {{ post.review }}</p>
-        <p>評価: {{ post.rating }} / 5</p>
-    {% endfor %}
+        <hr>
+
+        <h2>投稿一覧</h2>
+        {% for post in posts %}
+            <p>タイトル: {{ post.title }}</p>
+            <p>感想: {{ post.review }}</p>
+            <p>評価: {{ post.rating }} / 5</p>
+            <form method="POST" action="{{url_for('main.delete', id=post.id)}}" style="display: inline;">
+                <button type="submit">削除</button>
+            </form>
+            <form method="GET" action="{{url_for('main.edit', id=post.id)}}" style="display: inline;">
+                <button type="submit">編集</button>
+            </form>
+        {% endfor %}
     </body>
 </html>
