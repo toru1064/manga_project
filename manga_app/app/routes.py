@@ -1,5 +1,5 @@
-from flask import Blueprint, render_template, request, redirect, url_for
-from app.models import db, Book
+from flask import Blueprint, render_template, request, redirect, url_for, flash
+from app.models import db, Book, User
 
 bp = Blueprint('main', __name__)
 
@@ -65,3 +65,24 @@ def update(id):
         book.rating = request.form["rating"]
         db.session.commit()
     return redirect(url_for("main.index"))
+
+@bp.route("/register", methods=["GET", "POST"])
+def register():
+    error = None
+    if request.method == "POST":
+        username = request.form["username"].strip()
+        password = request.form["password"]
+
+        # 入力チェック
+        if not username or not password:
+            error = "すべての項目を入力してください。"
+        elif User.query.filter_by(username=username).first():
+            error = "このユーザー名は既に使われています。"
+        else:
+            user = User(username=username)
+            user.set_password(password)
+            db.session.add(user)
+            db.session.commit()
+            return redirect(url_for("main.login"))
+
+    return render_template("register.html", error=error)
