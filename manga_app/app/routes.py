@@ -1,6 +1,6 @@
 from flask import Blueprint, render_template, request, redirect, url_for, flash
 from app.models import db, Book, User
-from flask_login import login_user, logout_user, login_required
+from flask_login import login_user, logout_user, login_required, current_user
 
 bp = Blueprint('main', __name__)
 
@@ -23,8 +23,8 @@ def index():
         elif not rating.isdigit() or not (1 <= int(rating) <= 5):
             error = "評価は1～5の数字で入力してください。"
         else:
-            #Bookモデルのインスタンスを作成して保存
-            new_book = Book(title=title, review=review, rating=int(rating))
+            #Bookモデルのインスタンスを作成して保存、ユーザーと紐づけ
+            new_book = Book(title=title, review=review, rating=int(rating), user=current_user)
             db.session.add(new_book)
             db.session.commit()
             title = ""

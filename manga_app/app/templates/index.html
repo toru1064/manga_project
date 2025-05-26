@@ -33,6 +33,7 @@
 
         <h2>投稿一覧</h2>
         {% for post in posts %}
+            <p>投稿者： {{post.user.username}}</p>
             <p>タイトル: {{ post.title }}</p>
             <p>感想: {{ post.review }}</p>
             <p>評価: {{ post.rating }} / 5</p>
