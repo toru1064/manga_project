@@ -1,5 +1,6 @@
 from flask import Blueprint, render_template, request, redirect, url_for, flash
 from app.models import db, Book, User
+from flask_login import login_user
 
 bp = Blueprint('main', __name__)
 
@@ -86,3 +87,19 @@ def register():
             return redirect(url_for("main.login"))
 
     return render_template("register.html", error=error)
+
+@bp.route("/login", methods=["GET", "POST"])
+def login():
+    error = None
+    if request.method == "POST":
+        username = request.form["username"]
+        password = request.form["password"]
+
+        user = User.query.filter_by(username=username).first()
+        if user and user.check_password(password):
+            login_user(user)
+            return redirect(url_for("main.index"))
+        else:
+            error = "ユーザー名またはパスワードが正しくありません。"
+
+    return render_template("login.html", error=error)
