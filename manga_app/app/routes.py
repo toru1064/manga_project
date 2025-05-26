@@ -1,10 +1,11 @@
 from flask import Blueprint, render_template, request, redirect, url_for, flash
 from app.models import db, Book, User
-from flask_login import login_user
+from flask_login import login_user, logout_user, login_required
 
 bp = Blueprint('main', __name__)
 
 @bp.route("/", methods=["GET", "POST"])
+@login_required
 def index():
     error = None
     title = ""
@@ -42,6 +43,7 @@ def index():
 
 
 @bp.route("/delete/<int:id>", methods=["POST"])
+@login_required
 def delete(id):
     book = Book.query.get(id)
     if book:
@@ -50,6 +52,7 @@ def delete(id):
     return redirect("/")
 
 @bp.route("/edit/<int:id>", methods=["GET", "POST"])
+@login_required
 def edit(id):
     book = Book.query.get(id)
     if not book:
@@ -58,6 +61,7 @@ def edit(id):
     return render_template("edit.html", book=book)
 
 @bp.route("/update/<int:id>", methods=["POST"])
+@login_required
 def update(id):
     book = Book.query.get(id)
     if book:
@@ -103,3 +107,9 @@ def login():
             error = "ユーザー名またはパスワードが正しくありません。"
 
     return render_template("login.html", error=error)
+
+@bp.route("/logout")
+@login_required
+def logout():
+    logout_user()
+    return redirect(url_for("main.login"))
