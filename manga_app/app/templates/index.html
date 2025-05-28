@@ -37,12 +37,15 @@
             <p>タイトル: {{ post.title }}</p>
             <p>感想: {{ post.review }}</p>
             <p>評価: {{ post.rating }} / 5</p>
-            <form method="POST" action="{{url_for('main.delete', id=post.id)}}" style="display: inline;">
+
+            {% if post.user_id == current_user.id %}
+                <form method="POST" action="{{ url_for('main.delete', id=post.id) }}" style="display: inline;">
                 <button type="submit">削除</button>
-            </form>
-            <form method="GET" action="{{url_for('main.edit', id=post.id)}}" style="display: inline;">
+                </form>
+                <form method="GET" action="{{url_for('main.edit', id=post.id)}}" style="display: inline;">
                 <button type="submit">編集</button>
-            </form>
+                </form>
+            {% endif %}
         {% endfor %}
     </body>
 </html>

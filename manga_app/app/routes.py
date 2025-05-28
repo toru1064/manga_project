@@ -17,36 +17,35 @@ def index():
         review = request.form["review"].strip()
         rating = request.form["rating"]
 
-        #入力チェック
+        # 入力チェック
         if not title or not review:
             error = "タイトルと感想は必須です。"
         elif not rating.isdigit() or not (1 <= int(rating) <= 5):
             error = "評価は1～5の数字で入力してください。"
         else:
-            #Bookモデルのインスタンスを作成して保存、ユーザーと紐づけ
-            new_book = Book(title=title, review=review, rating=int(rating), user=current_user)
+            new_book = Book(title=title, review=review, rating=int(rating), user_id=current_user.id)
             db.session.add(new_book)
             db.session.commit()
-            title = ""
-            review = ""
-            rating = ""
+            title = review = rating = ""
 
-    #検索処理しデータベースから取得
+    # ログインユーザーの投稿のみ取得
     keyword = request.args.get("keyword", "")
     if keyword:
-        books = Book.query.filter(Book.title.contains(keyword)).all()
+        books = Book.query.filter(
+            Book.user_id == current_user.id,
+            Book.title.contains(keyword)
+        ).all()
     else:
         books = Book.query.all()
 
     return render_template("index.html", posts=books, error=error,
                            input_title=title, input_review=review, input_rating=rating)
 
-
 @bp.route("/delete/<int:id>", methods=["POST"])
 @login_required
 def delete(id):
     book = Book.query.get(id)
-    if book:
+    if book and book.user_id == current_user.id:
         db.session.delete(book)
         db.session.commit()
     return redirect("/")
@@ -55,7 +54,7 @@ def delete(id):
 @login_required
 def edit(id):
     book = Book.query.get(id)
-    if not book:
+    if not book or book.user_id != current_user.id:
         return redirect("/")
 
     return render_template("edit.html", book=book)
@@ -64,7 +63,7 @@ def edit(id):
 @login_required
 def update(id):
     book = Book.query.get(id)
-    if book:
+    if book and book.user_id == current_user.id:
         book.title = request.form["title"]
         book.review = request.form["review"]
         book.rating = request.form["rating"]
