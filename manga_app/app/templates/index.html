@@ -32,6 +32,12 @@
         <hr>
 
         <h2>投稿一覧</h2>
+        <form method="GET" action="/" style="display: inline;">
+            <input type="hidden" name="filter" value="my_posts">
+            <button type="submit">自分の投稿だけ表示</button>
+        </form>
+
+        <p><a href="/">すべての投稿を表示</a></p>   
         {% for post in posts %}
             <p>投稿者： {{post.user.username}}</p>
             <p>タイトル: {{ post.title }}</p>

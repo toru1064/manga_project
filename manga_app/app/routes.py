@@ -28,13 +28,14 @@ def index():
             db.session.commit()
             title = review = rating = ""
 
-    # ログインユーザーの投稿のみ取得
+    # 検索・フィルター処理（現在のユーザーの投稿のみ表示）
+    filter_option = request.args.get("filter", "")
     keyword = request.args.get("keyword", "")
-    if keyword:
-        books = Book.query.filter(
-            Book.user_id == current_user.id,
-            Book.title.contains(keyword)
-        ).all()
+
+    if filter_option == "my_posts":
+        books = Book.query.filter_by(user_id=current_user.id).all()
+    elif keyword:
+        books = Book.query.filter(Book.title.contains(keyword)).all()
     else:
         books = Book.query.all()
 
