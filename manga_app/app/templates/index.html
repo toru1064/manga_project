@@ -39,19 +39,32 @@
 
         <p><a href="/">すべての投稿を表示</a></p>   
         {% for post in posts %}
-            <p>投稿者： {{post.user.username}}</p>
+            <p>投稿者： {{ post.user.username }}</p>
             <p>タイトル: {{ post.title }}</p>
             <p>感想: {{ post.review }}</p>
             <p>評価: {{ post.rating }} / 5</p>
 
+            <form method="POST" action="{{ url_for('main.toggle_like', book_id=post.id) }}" style="display: inline;">
+                <button type="submit">
+                    {% if current_user in post.liked_users %}
+                        ❤️ {{ post.likes.count() }} いいね解除
+                    {% else %}
+                        🤍 {{ post.likes.count() }} いいね
+                    {% endif %}
+                </button>
+            </form>
+
+            <!-- 編集・削除は自分の投稿だけ -->
             {% if post.user_id == current_user.id %}
                 <form method="POST" action="{{ url_for('main.delete', id=post.id) }}" style="display: inline;">
-                <button type="submit">削除</button>
+                    <button type="submit">削除</button>
                 </form>
-                <form method="GET" action="{{url_for('main.edit', id=post.id)}}" style="display: inline;">
-                <button type="submit">編集</button>
+                <form method="GET" action="{{ url_for('main.edit', id=post.id) }}" style="display: inline;">
+                    <button type="submit">編集</button>
                 </form>
             {% endif %}
+            <hr>
+
         {% endfor %}
     </body>
 </html>

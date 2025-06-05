@@ -1,5 +1,5 @@
 from flask import Blueprint, render_template, request, redirect, url_for, flash
-from app.models import db, Book, User
+from app.models import db, Book, User, Like
 from flask_login import login_user, logout_user, login_required, current_user
 
 bp = Blueprint('main', __name__)
@@ -113,3 +113,46 @@ def login():
 def logout():
     logout_user()
     return redirect(url_for("main.login"))
+
+from flask_login import login_required, current_user
+from app.models import Like, Book, db
+
+@bp.route("/like/<int:book_id>", methods=["POST"])
+@login_required
+def like(book_id):
+    book = Book.query.get_or_404(book_id)
+
+    # すでにいいねしていないか確認
+    existing_like = Like.query.filter_by(user_id=current_user.id, book_id=book_id).first()
+    if not existing_like:
+        new_like = Like(user_id=current_user.id, book_id=book_id)
+        db.session.add(new_like)
+        db.session.commit()
+
+    return redirect(url_for('main.index'))
+
+@bp.route("/unlike/<int:book_id>", methods=["POST"])
+@login_required
+def unlike(book_id):
+    like = Like.query.filter_by(user_id=current_user.id, book_id=book_id).first()
+    if like:
+        db.session.delete(like)
+        db.session.commit()
+
+    return redirect(url_for('main.index'))
+
+@bp.route("/like/<int:book_id>", methods=["POST"])
+@login_required
+def toggle_like(book_id):
+    existing_like = Like.query.filter_by(user_id=current_user.id, book_id=book_id).first()
+
+    if existing_like:
+        # 既にいいねしている → 解除（削除）
+        db.session.delete(existing_like)
+    else:
+        # いいねしていない → 新規作成
+        new_like = Like(user_id=current_user.id, book_id=book_id)
+        db.session.add(new_like)
+
+    db.session.commit()
+    return redirect("/")
