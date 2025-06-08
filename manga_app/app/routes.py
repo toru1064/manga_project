@@ -35,9 +35,9 @@ def index():
     if filter_option == "my_posts":
         books = Book.query.filter_by(user_id=current_user.id).all()
     elif keyword:
-        books = Book.query.filter(Book.title.contains(keyword)).all()
+        books = Book.query.filter(Book.title.contains(keyword)).order_by(Book.created_at.desc()).all()
     else:
-        books = Book.query.all()
+        books = Book.query.order_by(Book.created_at.desc()).all()
 
     return render_template("index.html", posts=books, error=error,
                            input_title=title, input_review=review, input_rating=rating)
@@ -141,18 +141,21 @@ def unlike(book_id):
 
     return redirect(url_for('main.index'))
 
-@bp.route("/like/<int:book_id>", methods=["POST"])
+@bp.route("/toggle_like/<int:book_id>", methods=["POST"])
 @login_required
 def toggle_like(book_id):
-    existing_like = Like.query.filter_by(user_id=current_user.id, book_id=book_id).first()
+    book = Book.query.get_or_404(book_id)
+
+    # すでにいいねしているかを確認
+    existing_like = Like.query.filter_by(user_id=current_user.id, book_id=book.id).first()
 
     if existing_like:
-        # 既にいいねしている → 解除（削除）
+        # いいねを取り消す
         db.session.delete(existing_like)
     else:
-        # いいねしていない → 新規作成
-        new_like = Like(user_id=current_user.id, book_id=book_id)
+        # 新しくいいねする
+        new_like = Like(user_id=current_user.id, book_id=book.id)
         db.session.add(new_like)
 
     db.session.commit()
-    return redirect("/")
+    return redirect(url_for("main.index"))

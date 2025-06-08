@@ -39,6 +39,7 @@
 
         <p><a href="/">すべての投稿を表示</a></p>   
         {% for post in posts %}
+            <p>投稿日時: {{ post.created_at.strftime('%Y/%m/%d %H:%M') }}</p>
             <p>投稿者： {{ post.user.username }}</p>
             <p>タイトル: {{ post.title }}</p>
             <p>感想: {{ post.review }}</p>
