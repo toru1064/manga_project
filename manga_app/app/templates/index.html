@@ -55,6 +55,22 @@
                 </button>
             </form>
 
+            <!-- コメント一覧表示 -->
+            <div>
+                <strong>コメント:</strong>
+                <ul>
+                    {% for comment in post.comments %}
+                        <li>{{ comment.user.username }}: {{ comment.text }}</li>
+                    {% endfor %}
+                </ul>
+            </div>
+
+            <!-- コメント投稿フォーム -->
+            <form method="POST" action="{{ url_for('main.comment', book_id=post.id) }}">
+                <textarea name="comment_text" rows="2" cols="40" placeholder="コメントを書く..."></textarea>
+                <button type="submit">コメント投稿</button>
+            </form>
+
             <!-- 編集・削除は自分の投稿だけ -->
             {% if post.user_id == current_user.id %}
                 <form method="POST" action="{{ url_for('main.delete', id=post.id) }}" style="display: inline;">

@@ -159,3 +159,13 @@ def toggle_like(book_id):
 
     db.session.commit()
     return redirect(url_for("main.index"))
+
+@bp.route("/comment/<int:book_id>", methods=["POST"])
+@login_required
+def add_comment(book_id):
+    content = request.form["content"].strip()
+    if content:
+        comment = Comment(content=content, user_id=current_user.id, book_id=book_id)
+        db.session.add(comment)
+        db.session.commit()
+    return redirect(url_for("main.index"))

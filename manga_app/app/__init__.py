@@ -2,6 +2,9 @@ from flask import Flask
 from flask_login import LoginManager
 from .routes import bp
 from app.models import db, User
+from flask_migrate import Migrate
+
+migrate = Migrate()
 
 def create_app():
     app = Flask(__name__)
@@ -10,6 +13,7 @@ def create_app():
     app.config['SECRET_KEY'] = 'secret-key' # ログインに必要
 
     db.init_app(app)
+    migrate.init_app(app, db)
 
     from app.routes import bp
     app.register_blueprint(bp)
