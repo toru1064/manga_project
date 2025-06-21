@@ -45,4 +45,3 @@ class Comment(db.Model):
     book_id = db.Column(db.Integer, db.ForeignKey('book.id'), nullable=False)
 
     user = db.relationship('User', backref='Book_comments')
-    book = db.relationship('Book', backref='Book_comments')

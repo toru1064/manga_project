@@ -1,5 +1,5 @@
 from flask import Blueprint, render_template, request, redirect, url_for, flash
-from app.models import db, Book, User, Like
+from app.models import db, Book, User, Like, Comment
 from flask_login import login_user, logout_user, login_required, current_user
 
 bp = Blueprint('main', __name__)
@@ -169,3 +169,15 @@ def add_comment(book_id):
         db.session.add(comment)
         db.session.commit()
     return redirect(url_for("main.index"))
+
+@bp.route("/comment/<int:comment_id>/delete", methods=["POST"])
+@login_required
+def delete_comment(comment_id):
+    comment = Comment.query.get_or_404(comment_id)
+    
+    if comment.user_id != current_user.id:
+        abort(403)  # 自分のコメント以外は削除できない
+
+    db.session.delete(comment)
+    db.session.commit()
+    return redirect(url_for('main.index'))
