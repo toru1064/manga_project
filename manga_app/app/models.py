@@ -23,6 +23,11 @@ class User(db.Model, UserMixin):
     password_hash = db.Column(db.String(128), nullable=False)
     likes = db.relationship('Like', backref='user', cascade="all, delete", lazy='dynamic')
 
+    # プロフィール情報
+    profile_image = db.Column(db.String(256), nullable=True)
+    display_name = db.Column(db.String(64), nullable=True)
+    bio = db.Column(db.Text)
+
     # パスワード設定用メソッド
     def set_password(self, password):
         self.password_hash = generate_password_hash(password)

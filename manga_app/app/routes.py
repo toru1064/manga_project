@@ -181,3 +181,24 @@ def delete_comment(comment_id):
     db.session.delete(comment)
     db.session.commit()
     return redirect(url_for('main.index'))
+
+@bp.route("/profile")
+@login_required
+def profile():
+    return render_template("profile.html", user=current_user)
+
+@bp.route("/profile/edit", methods=["GET", "POST"])
+@login_required
+def edit_profile():
+    if request.method == "POST":
+        bio = request.form.get("bio", "").strip()
+        current_user.bio = bio
+        db.session.commit()
+        return redirect(url_for("main.profile"))
+
+    return render_template("edit_profile.html", user=current_user)
+
+@bp.route("/user/<int:user_id>")
+def user_profile(user_id):
+    user = User.query.get_or_404(user_id)
+    return render_template("profile.html", user=user)

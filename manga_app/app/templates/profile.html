@@ -1,0 +1,18 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <title>プロフィール</title>
+</head>
+<body>
+    <h1>プロフィール</h1>
+    <p>ユーザー名: {{ user.username }}</p>
+    <p>表示名: {{ user.display_name or "未設定" }}</p>
+    <p>自己紹介: {{ user.bio or "未記入" }}</p>
+
+    {% if current_user.id == user.id %}
+        <a href="{{ url_for('main.edit_profile') }}">プロフィールを編集する</a><br>
+    {% endif %}
+    <a href="{{ url_for('main.index') }}">ホームに戻る</a>
+</body>
+</html>

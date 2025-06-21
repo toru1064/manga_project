@@ -1,0 +1,18 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <title>プロフィール編集</title>
+</head>
+<body>
+    <h1>プロフィールを編集</h1>
+
+    <form method="POST">
+        <p>自己紹介:</p>
+        <textarea name="bio" rows="5" cols="40">{{ user.bio }}</textarea>
+        <p><input type="submit" value="保存"></p>
+    </form>
+
+    <p><a href="{{ url_for('main.profile') }}">プロフィールに戻る</a></p>
+</body>
+</html>
