@@ -7,9 +7,10 @@
 <body>
     <h1>プロフィールを編集</h1>
 
-    <form method="POST">
-        <p>自己紹介:</p>
-        <textarea name="bio" rows="5" cols="40">{{ user.bio }}</textarea>
+    <form method="POST" enctype="multipart/form-data">
+        <p>表示名: <input type="text" name="display_name" value="{{ current_user.display_name or '' }}"></p>
+        <p>自己紹介: <textarea name="bio">{{ current_user.bio or '' }}</textarea></p>
+        <p>プロフィール画像: <input type="file" name="profile_image"></p>
         <p><input type="submit" value="保存"></p>
     </form>
 

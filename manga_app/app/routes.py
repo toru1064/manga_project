@@ -1,6 +1,7 @@
 from flask import Blueprint, render_template, request, redirect, url_for, flash
 from app.models import db, Book, User, Like, Comment
 from flask_login import login_user, logout_user, login_required, current_user
+import os
 
 bp = Blueprint('main', __name__)
 
@@ -187,16 +188,34 @@ def delete_comment(comment_id):
 def profile():
     return render_template("profile.html", user=current_user)
 
-@bp.route("/profile/edit", methods=["GET", "POST"])
+from flask import current_app
+import os
+
+@bp.route('/profile/edit', methods=['GET', 'POST'])
 @login_required
 def edit_profile():
-    if request.method == "POST":
-        bio = request.form.get("bio", "").strip()
-        current_user.bio = bio
-        db.session.commit()
-        return redirect(url_for("main.profile"))
+    if request.method == 'POST':
+        display_name = request.form.get('display_name')
+        bio = request.form.get('bio')
+        image = request.files.get('profile_image')
 
-    return render_template("edit_profile.html", user=current_user)
+        current_user.display_name = display_name
+        current_user.bio = bio
+
+        # 画像の保存処理（ファイル名を user_id に基づいて保存）
+        if image and image.filename != '':
+            filename = f'user_{current_user.id}.png'
+            # 絶対パスで保存先を指定
+            save_dir = os.path.join(current_app.root_path, 'static', 'profile_images')
+            os.makedirs(save_dir, exist_ok=True)  # 念のためディレクトリがなければ作成
+            image_path = os.path.join(save_dir, filename)
+            image.save(image_path)
+            current_user.profile_image = filename
+
+        db.session.commit()
+        return redirect(url_for('main.profile', user_id=current_user.id))
+
+    return render_template('edit_profile.html', user=current_user)
 
 @bp.route("/user/<int:user_id>")
 def user_profile(user_id):

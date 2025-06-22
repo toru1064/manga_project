@@ -5,10 +5,15 @@
     <title>プロフィール</title>
 </head>
 <body>
-    <h1>プロフィール</h1>
-    <p>ユーザー名: {{ user.username }}</p>
-    <p>表示名: {{ user.display_name or "未設定" }}</p>
-    <p>自己紹介: {{ user.bio or "未記入" }}</p>
+    <h1>{{ user.username }}さんのプロフィール</h1>
+
+    {% if user.profile_image %}
+        <img src="{{ url_for('static', filename='profile_images/' + user.profile_image) }}" alt="プロフィール画像" width="150">
+    {% else %}
+        <p>プロフィール画像は未設定です</p>
+    {% endif %}
+    <p><strong>表示名:</strong> {{ user.display_name or '未設定' }}</p>
+    <p><strong>自己紹介:</strong> {{ user.bio or '未設定' }}</p>
 
     {% if current_user.id == user.id %}
         <a href="{{ url_for('main.edit_profile') }}">プロフィールを編集する</a><br>
