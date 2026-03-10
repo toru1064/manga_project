@@ -221,3 +221,10 @@ def edit_profile():
 def user_profile(user_id):
     user = User.query.get_or_404(user_id)
     return render_template("profile.html", user=user)
+
+@bp.route("/ranking")
+@login_required
+def ranking():
+    books = Book.query.all()
+    books = sorted(books, key=lambda book: book.likes.count(), reverse=True)
+    return render_template("ranking.html", books=books)
