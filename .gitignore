@@ -16,3 +16,7 @@ venv/
 # OSによる一時ファイル
 .DS_Store
 Thumbs.db
+
+# DB関連 ← ★これ追加
+instance/
+*.db
