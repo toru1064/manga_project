@@ -1,0 +1,21 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <title>評価ランキング</title>
+</head>
+<body>
+    <h1>評価ランキング</h1>
+
+    <p><a href="{{ url_for('main.index') }}">ホームに戻る</a></p>
+
+    {% for book in books %}
+        <hr>
+        <p>{{ loop.index }}位</p>
+        <p>投稿者: {{ book.user.username }}</p>
+        <p>タイトル: {{ book.title }}</p>
+        <p>感想: {{ book.review }}</p>
+        <p>評価: {{ book.rating }} / 5</p>
+    {% endfor %}
+</body>
+</html>

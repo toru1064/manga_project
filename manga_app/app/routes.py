@@ -2,6 +2,7 @@ from flask import Blueprint, render_template, request, redirect, url_for, flash
 from app.models import db, Book, User, Like, Comment
 from flask_login import login_user, logout_user, login_required, current_user
 import os
+from sqlalchemy import or_
 
 bp = Blueprint('main', __name__)
 
@@ -36,7 +37,12 @@ def index():
     if filter_option == "my_posts":
         books = Book.query.filter_by(user_id=current_user.id).all()
     elif keyword:
-        books = Book.query.filter(Book.title.contains(keyword)).order_by(Book.created_at.desc()).all()
+        books = Book.query.filter(
+            or_(
+                Book.title.contains(keyword),
+                Book.review.contains(keyword)
+            )
+        ).order_by(Book.created_at.desc()).all()
     else:
         books = Book.query.order_by(Book.created_at.desc()).all()
 
@@ -228,3 +234,9 @@ def ranking():
     books = Book.query.all()
     books = sorted(books, key=lambda book: book.likes.count(), reverse=True)
     return render_template("ranking.html", books=books)
+
+@bp.route("/rating_ranking")
+@login_required
+def rating_ranking():
+    books = Book.query.order_by(Book.rating.desc()).all()
+    return render_template("rating_ranking.html", books=books)
