@@ -1,97 +1,131 @@
 <!DOCTYPE html>
 <html lang="ja">
     <head>
+        <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
         <meta charset="UTF-8">
         <title>漫画感想アプリ</title>
     </head>
-    <body>
-        <p>
-            <a href="{{ url_for('main.logout') }}">ログアウト</a>
-        </p>
+    <body class="bg-light">
+        <div class="container mt-4">
 
-        <p><a href="{{ url_for('main.profile') }}">プロフィール</a></p>
+            <nav class="d-flex gap-2 flex-wrap mb-4">
+                <a href="{{ url_for('main.index') }}" class="btn btn-primary">ホーム</a>
+                <a href="{{ url_for('main.profile', user_id=current_user.id) }}" class="btn btn-outline-primary">プロフィール</a>
+                <a href="{{ url_for('main.rating_ranking') }}" class="btn btn-outline-success">評価ランキング</a>
+                <a href="{{ url_for('main.ranking') }}" class="btn btn-outline-warning">いいねランキング</a>
+                <a href="{{ url_for('main.logout') }}" class="btn btn-outline-danger">ログアウト</a>
+            </nav>
 
-        <h1>漫画の感想を投稿</h1>
+            <h1>漫画の感想を投稿</h1>
 
-        <h2>漫画を検索</h2>
-        <form method="GET" action="{{ url_for('main.index') }}">
-            <input type="text" name="keyword" placeholder="キーワードを入力" value="{{ request.args.get('keyword', '') }}">
-            <input type="submit" value="検索">
-        </form>
-        <hr>
-
-        {% if error %}
-            <p style="color: red;">{{error}}</p>
-        {% endif %}
-
-        <form method="POST">
-            <p>タイトル:<input type="text" name="title" value="{{ input_title }}" required></p>
-            <p>感想:<textarea name="review" required>{{ input_review }}</textarea></p>
-            <p>評価(1~5):<input type="number" name="rating" min="1" max="5" value="{{ input_rating }}" required></p>
-            <p><input type="submit" value="投稿"></p>
-        </form>
-
-        <hr>
-
-        <h2>投稿一覧</h2>
-        <form method="GET" action="/" style="display: inline;">
-            <input type="hidden" name="filter" value="my_posts">
-            <button type="submit">自分の投稿だけ表示</button>
-        </form>
-
-        <p><a href="/">すべての投稿を表示</a></p>
-        <p><a href="{{ url_for('main.ranking') }}">いいねランキングを見る</a></p>
-        <p><a href="{{ url_for('main.rating_ranking') }}">評価ランキングを見る</a></p>
-   
-        {% for post in posts %}
-            <p>投稿日時: {{ post.created_at.strftime('%Y/%m/%d %H:%M') }}</p>
-            <p>投稿者：<a href="{{ url_for('main.user_profile', user_id=post.user.id) }}">{{ post.user.username }}</a></p>
-            <p>タイトル: {{ post.title }}</p>
-            <p>感想: {{ post.review }}</p>
-            <p>評価: {{ post.rating }} / 5</p>
-
-            <form method="POST" action="{{ url_for('main.toggle_like', book_id=post.id) }}" style="display: inline;">
-                <button type="submit">
-                    {% if current_user in post.liked_users %}
-                        ❤️ {{ post.likes.count() }} いいね解除
-                    {% else %}
-                        🤍 {{ post.likes.count() }} いいね
-                    {% endif %}
-                </button>
+            <h2>漫画を検索</h2>
+            <form method="GET" action="{{ url_for('main.index') }}" class="d-flex gap-2 mb-3">
+                <input type="text" name="keyword" class="form-control" placeholder="キーワードを入力" value="{{ request.args.get('keyword', '') }}">
+                <input type="submit" value="検索" class="btn btn-outline-secondary">
             </form>
-
-            <!-- コメント一覧表示 -->
-            <div>
-                <strong>コメント:</strong>
-                <ul>
-                    {% for comment in post.comments %}
-                        <li>{{ comment.user.username }}: {{ comment.content }}</li>
-                        {% if comment.user_id == current_user.id %}
-                            <form method="POST" action="{{ url_for('main.delete_comment', comment_id=comment.id) }}" style="display: inline;">
-                                <button type="submit">削除</button>
-                            </form>
-                        {% endif %}
-                    {% endfor %}
-                </ul>
-            </div>
-
-            <!-- コメント投稿フォーム -->
-            <form method="POST" action="{{ url_for('main.add_comment', book_id=post.id) }}">
-                <textarea name="content" rows="2" cols="40" placeholder="コメントを書く..."></textarea>
-                <button type="submit">コメント投稿</button>
-            </form>
-
-            <!-- 編集・削除は自分の投稿だけ -->
-            {% if post.user_id == current_user.id %}
-                <form method="POST" action="{{ url_for('main.delete', id=post.id) }}" style="display: inline;">
-                    <button type="submit">削除</button>
-                </form>
-                <form method="GET" action="{{ url_for('main.edit', id=post.id) }}" style="display: inline;">
-                    <button type="submit">編集</button>
-                </form>
-            {% endif %}
             <hr>
 
-        {% endfor %}
+            {% if error %}
+                <p style="color: red;">{{error}}</p>
+            {% endif %}
+
+            <form method="POST" class="mb-4">
+                <div class="mb-3">
+                    <label>タイトル</label>
+                    <input type="text" name="title" value="{{ input_title }}" required class="form-control">
+                </div>
+
+                <div class="mb-3">
+                    <label>感想</label>
+                    <textarea name="review" required class="form-control">{{ input_review }}</textarea>
+                </div>
+
+                <div class="mb-3">
+                    <label>評価(1~5)</label>
+                    <input type="number" name="rating" min="1" max="5" value="{{ input_rating }}" required class="form-control">
+                </div>
+
+                <button type="submit" class="btn btn-success">投稿</button>
+            </form>
+
+            <hr>
+
+            <h2>投稿一覧</h2>
+            <div class="d-flex gap-2 mb-3">
+
+                <a href="/" class="btn btn-outline-dark">すべての投稿を表示</a>
+
+                <form method="GET" action="/" class="m-0">
+                    <input type="hidden" name="filter" value="my_posts">
+                    <button type="submit" class="btn btn-outline-dark">自分の投稿だけ表示</button>
+                </form>
+                
+            </div>
+    
+            {% for post in posts %}
+                <div class="mb-3 p-3 border rounded bg-white">
+                    <p class="text-muted mb-1">
+                        {{ post.created_at.strftime('%Y/%m/%d %H:%M') }}
+                    </p>
+
+                    <p class="mb-1">
+                        投稿者：
+                        <a href="{{ url_for('main.user_profile', user_id=post.user.id) }}">
+                            {{ post.user.username }}
+                        </a>
+                    </p>
+
+                    <h5>{{ post.title }}</h5>
+
+                    <p>{{ post.review }}</p>
+
+                    <p>評価: {{ post.rating }} / 5</p>
+
+                    <form method="POST" action="{{ url_for('main.toggle_like', book_id=post.id) }}" style="display: inline;">
+                        <button type="submit">
+                            {% if current_user in post.liked_users %}
+                                ❤️ {{ post.likes.count() }} いいね解除
+                            {% else %}
+                                🤍 {{ post.likes.count() }} いいね
+                            {% endif %}
+                        </button>
+                    </form>
+
+                    <!-- コメント一覧表示 -->
+                    <div>
+                        <strong>コメント:</strong>
+                        <ul>
+                            {% for comment in post.comments %}
+                                <li>{{ comment.user.username }}: {{ comment.content }}</li>
+                                {% if comment.user_id == current_user.id %}
+                                    <form method="POST" action="{{ url_for('main.delete_comment', comment_id=comment.id) }}" style="display: inline;">
+                                        <button type="submit">削除</button>
+                                    </form>
+                                {% endif %}
+                            {% endfor %}
+                        </ul>
+                    </div>
+
+                    <!-- コメント投稿フォーム -->
+                    <form method="POST" action="{{ url_for('main.add_comment', book_id=post.id) }}">
+                        <textarea name="content" rows="2" cols="40" placeholder="コメントを書く..."></textarea>
+                        <button type="submit">コメント投稿</button>
+                    </form>
+
+                    <!-- 編集・削除は自分の投稿だけ -->
+                    {% if post.user_id == current_user.id %}
+                        <form method="POST" action="{{ url_for('main.delete', id=post.id) }}" style="display: inline;">
+                            <button type="submit">削除</button>
+                        </form>
+                        <form method="GET" action="{{ url_for('main.edit', id=post.id) }}" style="display: inline;">
+                            <button type="submit">編集</button>
+                        </form>
+                    {% endif %}
+                    <hr>
+
+                </div>
+            {% endfor %}
+
+        
     </body>
 </html>
