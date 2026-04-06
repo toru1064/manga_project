@@ -71,7 +71,7 @@
                     <p class="mb-1">
                         投稿者：
                         <a href="{{ url_for('main.user_profile', user_id=post.user.id) }}">
-                            {{ post.user.username }}
+                            {{ post.user.display_name or post.user.username }}
                         </a>
                     </p>
 
@@ -96,7 +96,7 @@
                         <strong>コメント:</strong>
                         <ul>
                             {% for comment in post.comments %}
-                                <li>{{ comment.user.username }}: {{ comment.content }}</li>
+                                <li>{{ post.user.display_name or post.user.username }}: {{ comment.content }}</li>
                                 {% if comment.user_id == current_user.id %}
                                     <form method="POST" action="{{ url_for('main.delete_comment', comment_id=comment.id) }}" style="display: inline;">
                                         <button type="submit">削除</button>
