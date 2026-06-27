@@ -3,6 +3,7 @@ from app.models import db, Book, User, Like, Comment
 from flask_login import login_user, logout_user, login_required, current_user
 import os
 from sqlalchemy import or_
+import requests
 
 bp = Blueprint('main', __name__)
 
@@ -240,3 +241,55 @@ def ranking():
 def rating_ranking():
     books = Book.query.order_by(Book.rating.desc()).all()
     return render_template("rating_ranking.html", books=books)
+
+@bp.route("/manga/search")
+def manga_search():
+    keyword = request.args.get("keyword")
+    books = []
+    error = None
+
+    if keyword:
+        url = "https://www.googleapis.com/books/v1/volumes"
+        params = {
+            "q": f"intitle:{keyword}",
+            "maxResults": 10,
+            "langRestrict": "ja"
+        }
+
+        response = requests.get(url, params=params)
+
+        print("ステータスコード:", response.status_code)
+        print("レスポンス:", response.text[:500])
+
+        if response.status_code == 200:
+            data = response.json()
+            print("取得件数:", data.get("totalItems"))
+
+            for item in data.get("items", []):
+                volume_info = item.get("volumeInfo", {})
+
+                title = volume_info.get("title", "タイトル不明")
+                authors = volume_info.get("authors", ["著者不明"])
+                description = volume_info.get("description", "")
+                image_links = volume_info.get("imageLinks", {})
+                thumbnail = image_links.get("thumbnail")
+
+                books.append({
+                    "title": title,
+                    "authors": ", ".join(authors),
+                    "description": description,
+                    "thumbnail": thumbnail
+                })
+
+        elif response.status_code == 429:
+            error = "Google Books APIの利用上限に達しました。時間をおいて再度検索してください。"
+
+        else:
+            error = "漫画情報の取得中にエラーが発生しました。"
+
+    return render_template(
+        "manga_search.html",
+        books=books,
+        keyword=keyword,
+        error=error
+    )
