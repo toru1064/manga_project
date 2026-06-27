@@ -20,3 +20,6 @@ Thumbs.db
 # DB関連 ← ★これ追加
 instance/
 *.db
+
+# ZIPファイル
+*.zip
