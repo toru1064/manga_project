@@ -1,0 +1,19 @@
+branch-defaults:
+  default:
+    environment: manga-app-env
+environment-defaults:
+  manga-app-env:
+    branch: null
+    repository: null
+global:
+  application_name: manga-app
+  default_ec2_keyname: null
+  default_platform: Python 3.11 running on 64bit Amazon Linux 2023
+  default_region: ap-northeast-1
+  include_git_submodules: true
+  instance_profile: null
+  platform_name: null
+  platform_version: null
+  profile: eb-cli
+  sc: null
+  workspace_type: Application
