@@ -1,9 +1,9 @@
 from flask import Blueprint, render_template, request, redirect, url_for, flash
 from app.models import db, Book, User, Like, Comment
 from flask_login import login_user, logout_user, login_required, current_user
-import os
 from sqlalchemy import or_
 import requests
+import os
 
 bp = Blueprint('main', __name__)
 
@@ -253,7 +253,8 @@ def manga_search():
         params = {
             "q": f"intitle:{keyword}",
             "maxResults": 10,
-            "langRestrict": "ja"
+            "langRestrict": "ja",
+            "key": os.environ.get("GOOGLE_BOOKS_API_KEY")
         }
 
         response = requests.get(url, params=params)
