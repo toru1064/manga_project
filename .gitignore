@@ -17,7 +17,7 @@ venv/
 .DS_Store
 Thumbs.db
 
-# DB関連 ← ★これ追加
+# DB関連
 instance/
 *.db
 
