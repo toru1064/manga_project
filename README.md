@@ -1,97 +1,182 @@
 # 漫画感想アプリ（Flask）
 
+## 開発目的
+
+Flaskを用いたWebアプリケーション開発の学習に加え、AWSを利用したインフラ構築やCI/CDの実践を目的として開発しました。
+
+CRUD機能だけでなく、Amazon S3による画像保存、Amazon RDSとの接続、GitHub Actionsによる自動デプロイなど、実際のWebサービス開発を意識した構成を目指しました。
+
+---
+
 ## 概要
 
-このアプリは、好きな漫画に対して感想や評価を投稿・共有できるWebアプリケーションです。
-PythonのWebフレームワーク「Flask」を使用して開発しました。
+好きな漫画に対して感想や評価を投稿・共有できるWebアプリケーションです。
 
-ユーザー登録・ログイン、投稿、いいね、コメント、プロフィール、ランキング、検索など、基本的なWebアプリケーション機能を実装しています。
+PythonのWebフレームワーク「Flask」を使用し、ユーザー登録・ログイン、投稿、いいね、コメント、プロフィール、ランキング、検索など、SNS型Webアプリケーションの基本機能を実装しています。
+
+また、AWSへデプロイし、GitHub ActionsによるCI/CD環境も構築しています。
+
+---
 
 ## 主な機能
 
-* ユーザー登録 / ログイン機能
-* 投稿機能（タイトル・感想・評価）
-* 投稿の編集 / 削除
-* 投稿一覧表示
-* いいね機能（トグル）
-* コメント機能
-* プロフィール機能（名前・自己紹介・画像）
-* ランキング機能（いいね数・評価）
-* 検索機能（タイトル・感想）
-* Google Books APIを利用した漫画検索機能（実装途中）
+- ユーザー登録 / ログイン
+- 投稿機能（タイトル・感想・評価）
+- 投稿の編集 / 削除
+- 投稿一覧表示
+- いいね機能
+- コメント機能
+- プロフィール機能
+  - 表示名
+  - 自己紹介
+  - プロフィール画像
+- ランキング機能
+  - いいね数
+  - 評価順
+- タイトル・感想検索
+- Google Books APIを利用した漫画検索（実装途中）
+
+---
 
 ## 使用技術
 
-* Python 3.x
-* Flask
-* Flask-Login
-* Flask-SQLAlchemy
-* Flask-Migrate
-* HTML / CSS
-* Jinja2
-* SQLite
-* Google Books API
-* Gunicorn
-* AWS Elastic Beanstalk
-* Git / GitHub
+### バックエンド
 
-## デプロイ状況
+- Python 3.11
+- Flask
+- Flask-Login
+- Flask-SQLAlchemy
+- Flask-Migrate
+- Gunicorn
 
-### Render
+### フロントエンド
 
-Render用ブランチを作成し、既存のRender環境はそのブランチを参照する形で維持しています。
+- HTML
+- CSS
+- Jinja2
 
-### AWS Elastic Beanstalk
+### データベース
 
-AWS Elastic Beanstalkを使用して、Flaskアプリケーションをデプロイしました。
+- SQLite
+- Amazon RDS PostgreSQL
 
-現在のAWS環境では、以下の構成で動作確認を行っています。
+### AWS
 
-* AWS Elastic Beanstalk
-* Python 3.11
-* Gunicorn
-* Nginx
-* SQLite（一時的な動作確認用）
+- AWS Elastic Beanstalk
+- Amazon EC2
+- Amazon S3
+- Amazon RDS
+- IAM
 
-また、EB CLIを導入し、手動でzipファイルをアップロードする方式から、以下のコマンドでデプロイできるようにしました。
+### CI/CD
 
-```bash
-eb deploy
+- GitHub Actions
+- GitHub OIDC
+
+### その他
+
+- Google Books API
+- Git
+- GitHub
+
+---
+
+## システム構成
+
+```text
+GitHub
+    │
+    ▼
+GitHub Actions
+    │
+    ▼
+Elastic Beanstalk
+    │
+ ┌──┴─────────────┐
+ ▼                ▼
+EC2          Amazon S3
+ │
+ ▼
+SQLite
+（DATABASE_URL設定時はAmazon RDS PostgreSQLへ接続）
 ```
 
-## 現在の注意点
+---
 
-現在のAWS環境ではSQLiteを使用しているため、Elastic BeanstalkのデプロイやEC2インスタンスの再作成時に、登録ユーザーや投稿データが消える可能性があります。
+## CI/CD
 
-そのため、現時点ではAWS上でのアプリ起動確認・動作確認を目的とした構成です。
-今後、Amazon RDS PostgreSQLへ移行し、デプロイ後もデータが保持される構成へ改善する予定です。
+GitHub Actionsを利用し、mainブランチへPushすると自動でElastic BeanstalkへデプロイされるCI/CD環境を構築しています。
 
-また、Google Books API連携機能は実装途中です。
-現在はAPIへリクエストする処理まで実装していますが、APIキーの環境変数管理や検索結果の投稿フォーム連携は今後対応予定です。
+AWS認証にはGitHub OIDCを利用し、アクセスキーを使用しないセキュアな認証方式を採用しています。
+
+### デプロイフロー
+
+```text
+git push
+    │
+    ▼
+GitHub Actions
+    │
+    ▼
+GitHub OIDC認証
+    │
+    ▼
+AWS Elastic Beanstalkへ自動デプロイ
+```
+
+---
+
+## 工夫した点
+
+- Flask Blueprintを利用し、機能ごとにコードを分割
+- SQLAlchemyを利用したORM設計
+- Amazon S3へ画像を保存し、ローカルストレージへ依存しない構成
+- 環境変数(DATABASE_URL)によってSQLiteとAmazon RDS PostgreSQLを切り替えられる構成
+- GitHub ActionsによるCI/CD環境を構築
+- GitHub OIDC認証を利用し、AWSアクセスキーを使用しないセキュアなデプロイを実現
+
+---
 
 ## 画面イメージ
 
-準備中（スクリーンショットを後で追加予定）
+※ スクリーンショットを後日追加予定
+
+---
 
 ## インストール方法
+
+リポジトリをクローンします。
 
 ```bash
 git clone https://github.com/toru1064/manga_project.git
 cd manga_project/manga_app
+```
 
+仮想環境を作成します。
+
+```bash
 python -m venv venv
 ```
 
-Windowsの場合：
+Windows
 
 ```bash
 venv\Scripts\activate
 ```
 
-必要なライブラリをインストールします。
+ライブラリをインストールします。
 
 ```bash
 pip install -r requirements.txt
+```
+
+環境変数を設定します。
+
+```env
+SECRET_KEY=xxxx
+DATABASE_URL=xxxx（未設定の場合はSQLiteを使用）
+GOOGLE_BOOKS_API_KEY=xxxx
+S3_BUCKET_NAME=xxxx
 ```
 
 アプリを起動します。
@@ -100,13 +185,13 @@ pip install -r requirements.txt
 flask run
 ```
 
+---
+
 ## 今後の改善予定
 
-* SQLiteからAmazon RDS PostgreSQLへの移行
-* データベース接続情報の環境変数化
-* Google Books APIキーの環境変数管理
-* Google Books APIの検索結果を投稿フォームへ連携
-* 投稿時に表紙画像・著者情報を自動反映
-* GitHub Actionsによる自動デプロイの導入
-* スクリーンショットの追加
-* AWS構成図の追加
+- Google Books APIの検索結果を投稿フォームへ自動反映
+- 投稿時に表紙画像・著者情報を自動取得
+- 画像の圧縮・リサイズ対応
+- Docker対応
+- CloudFrontを利用した画像配信
+- レスポンシブデザインの改善
