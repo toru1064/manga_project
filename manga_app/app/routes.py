@@ -4,8 +4,16 @@ from flask_login import login_user, logout_user, login_required, current_user
 from sqlalchemy import or_
 import requests
 import os
+import boto3
 
 bp = Blueprint('main', __name__)
+
+s3 = boto3.client(
+    "s3",
+    region_name="ap-northeast-1"
+)
+
+S3_BUCKET_NAME = os.environ.get("S3_BUCKET_NAME")
 
 @bp.route("/", methods=["GET", "POST"])
 @login_required
@@ -193,7 +201,23 @@ def delete_comment(comment_id):
 @bp.route("/profile")
 @login_required
 def profile():
-    return render_template("profile.html", user=current_user)
+    profile_image_url = None
+
+    if current_user.profile_image:
+        profile_image_url = s3.generate_presigned_url(
+            "get_object",
+            Params={
+                "Bucket": S3_BUCKET_NAME,
+                "Key": current_user.profile_image
+            },
+            ExpiresIn=3600
+        )
+
+    return render_template(
+        "profile.html",
+        user=current_user,
+        profile_image_url=profile_image_url
+    )
 
 from flask import current_app
 import os
@@ -212,11 +236,13 @@ def edit_profile():
         # 画像の保存処理（ファイル名を user_id に基づいて保存）
         if image and image.filename != '':
             filename = f'user_{current_user.id}.png'
-            # 絶対パスで保存先を指定
-            save_dir = os.path.join(current_app.root_path, 'static', 'profile_images')
-            os.makedirs(save_dir, exist_ok=True)  # 念のためディレクトリがなければ作成
-            image_path = os.path.join(save_dir, filename)
-            image.save(image_path)
+            #S3にアップロード
+            s3.upload_fileobj(
+                image,
+                S3_BUCKET_NAME,
+                filename,
+                ExtraArgs={"ContentType": image.content_type}
+            )
             current_user.profile_image = filename
 
         db.session.commit()
@@ -227,7 +253,24 @@ def edit_profile():
 @bp.route("/user/<int:user_id>")
 def user_profile(user_id):
     user = User.query.get_or_404(user_id)
-    return render_template("profile.html", user=user)
+
+    profile_image_url = None
+
+    if user.profile_image:
+        profile_image_url = s3.generate_presigned_url(
+            "get_object",
+            Params={
+                "Bucket": S3_BUCKET_NAME,
+                "Key": user.profile_image
+            },
+            ExpiresIn=3600
+        )
+
+    return render_template(
+        "profile.html",
+        user=user,
+        profile_image_url=profile_image_url
+    )
 
 @bp.route("/ranking")
 @login_required

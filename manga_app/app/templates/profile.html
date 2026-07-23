@@ -17,10 +17,10 @@
 
             <!-- プロフィール画像 -->
             <div class="text-center mb-3">
-                {% if user.profile_image %}
-                    <img src="{{ url_for('static', filename='profile_images/' + user.profile_image) }}"
-                         class="rounded-circle"
-                         width="120">
+                {% if profile_image_url %}
+                    <img src="{{ profile_image_url }}"
+                        class="rounded-circle"
+                        width="120">
                 {% else %}
                     <p class="text-muted">画像未設定</p>
                 {% endif %}
