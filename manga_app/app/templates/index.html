@@ -142,7 +142,7 @@
                         action="{{ url_for('main.toggle_like', book_id=post.id) }}"
                         class="mt-3"
                     >
-                        <button type="submit">
+                        <button type="submit" class="btn btn-sm btn-outline-danger">
                             {% if current_user in post.liked_users %}
                                 ❤️ {{ post.likes.count() }} いいね解除
                             {% else %}
