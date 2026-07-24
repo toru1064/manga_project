@@ -10,7 +10,7 @@
 
             <nav class="sticky-top bg-light py-3 mb-4 border-bottom d-flex gap-2 flex-wrap">
                 <a href="{{ url_for('main.index') }}" class="btn btn-primary">ホーム</a>
-                <a href="{{ url_for('main.create_post') }}" class="btn btn-outline-success">感想を投稿</a>
+                <a href="{{ url_for('main.create_post') }}" class="btn btn-outline-success">投稿</a>
                 <a href="{{ url_for('main.profile', user_id=current_user.id) }}" class="btn btn-outline-primary">プロフィール</a>
                 <a href="{{ url_for('main.rating_ranking') }}" class="btn btn-outline-success">評価ランキング</a>
                 <a href="{{ url_for('main.ranking') }}" class="btn btn-outline-warning">いいねランキング</a>
@@ -125,7 +125,14 @@
 
                             <div class="mb-3">
                                 <span class="badge bg-warning text-dark fs-6">
-                                    評価 {{ post.rating }} / 5
+                                    {% for i in range(1, 6) %}
+                                        {% if i <= post.rating %}
+                                            ★
+                                        {% else %}
+                                            ☆
+                                        {% endif %}
+                                    {% endfor %}
+                                    {{ post.rating }} / 5
                                 </span>
                             </div>
 
@@ -155,7 +162,7 @@
                     <div class="mt-4 pt-3 border-top">
 
                         <h6 class="mb-3">
-                            コメント
+                            💬 コメント（{{ post.comments.count() }}件）
                         </h6>
 
                         <!-- コメント一覧 -->
@@ -225,7 +232,49 @@
                     </div>
                 </div>
             {% endfor %}
+            <nav class="mt-4">
+                <ul class="pagination justify-content-center">
 
+                    {% if pagination.has_prev %}
+                        <li class="page-item">
+                            <a class="page-link"
+                            href="{{ url_for('main.index',
+                                                page=pagination.prev_num,
+                                                filter=request.args.get('filter'),
+                                                keyword=request.args.get('keyword')) }}">
+                                前へ
+                            </a>
+                        </li>
+                    {% endif %}
+
+                    {% for page_num in pagination.iter_pages() %}
+                        {% if page_num %}
+                            <li class="page-item {% if page_num == pagination.page %}active{% endif %}">
+                                <a class="page-link"
+                                href="{{ url_for('main.index',
+                                                    page=page_num,
+                                                    filter=request.args.get('filter'),
+                                                    keyword=request.args.get('keyword')) }}">
+                                    {{ page_num }}
+                                </a>
+                            </li>
+                        {% endif %}
+                    {% endfor %}
+
+                    {% if pagination.has_next %}
+                        <li class="page-item">
+                            <a class="page-link"
+                            href="{{ url_for('main.index',
+                                                page=pagination.next_num,
+                                                filter=request.args.get('filter'),
+                                                keyword=request.args.get('keyword')) }}">
+                                次へ
+                            </a>
+                        </li>
+                    {% endif %}
+
+                </ul>
+            </nav>
         </div>
     </body>
 </html>

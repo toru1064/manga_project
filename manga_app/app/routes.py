@@ -22,30 +22,50 @@ def index():
     # 検索・フィルターの条件を取得
     filter_option = request.args.get("filter", "")
     keyword = request.args.get("keyword", "")
+    page = request.args.get("page", 1, type=int)
 
     # 自分の投稿だけ表示
     if filter_option == "my_posts":
-        books = Book.query.filter_by(
+        pagination = Book.query.filter_by(
             user_id=current_user.id
-        ).order_by(Book.created_at.desc()).all()
+        ).order_by(
+            Book.created_at.desc()
+        ).paginate(
+            page=page,
+            per_page=5,
+            error_out=False
+        )
 
     # キーワード検索
     elif keyword:
-        books = Book.query.filter(
+        pagination = Book.query.filter(
             or_(
                 Book.title.contains(keyword),
                 Book.review.contains(keyword)
             )
-        ).order_by(Book.created_at.desc()).all()
+        ).order_by(
+            Book.created_at.desc()
+        ).paginate(
+            page=page,
+            per_page=5,
+            error_out=False
+        )
 
     # すべての投稿を表示
     else:
-        books = Book.query.order_by(Book.created_at.desc()).all()
+        pagination = Book.query.order_by(
+            Book.created_at.desc()
+        ).paginate(
+            page=page,
+            per_page=5,
+            error_out=False
+        )
 
     # 投稿一覧画面を表示
     return render_template(
         "index.html",
-        posts=books
+        posts=pagination.items,
+        pagination=pagination
     )
 
 @bp.route("/create", methods=["GET", "POST"])
