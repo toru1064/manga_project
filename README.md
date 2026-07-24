@@ -157,7 +157,6 @@ pip install -r requirements.txt
 環境変数を設定します。
 
 ```env
-SECRET_KEY=xxxx
 DATABASE_URL=xxxx（未設定の場合はSQLiteを使用）
 GOOGLE_BOOKS_API_KEY=xxxx
 S3_BUCKET_NAME=xxxx
