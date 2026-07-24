@@ -83,23 +83,7 @@ PythonのWebフレームワーク「Flask」を使用し、ユーザー登録・
 
 ## システム構成
 
-```text
-GitHub
-    │
-    ▼
-GitHub Actions
-    │
-    ▼
-Elastic Beanstalk
-    │
- ┌──┴─────────────┐
- ▼                ▼
-EC2          Amazon S3
- │
- ▼
-SQLite
-（DATABASE_URL設定時はAmazon RDS PostgreSQLへ接続）
-```
+![システム構成図](images/system-architecture.png)
 
 ---
 
