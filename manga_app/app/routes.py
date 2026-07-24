@@ -15,36 +15,21 @@ s3 = boto3.client(
 
 S3_BUCKET_NAME = os.environ.get("S3_BUCKET_NAME")
 
-@bp.route("/", methods=["GET", "POST"])
+@bp.route("/", methods=["GET"])
 @login_required
 def index():
-    error = None
-    title = ""
-    review = ""
-    rating = ""
 
-    if request.method == "POST":
-        title = request.form["title"].strip()
-        review = request.form["review"].strip()
-        rating = request.form["rating"]
-
-        # 入力チェック
-        if not title or not review:
-            error = "タイトルと感想は必須です。"
-        elif not rating.isdigit() or not (1 <= int(rating) <= 5):
-            error = "評価は1～5の数字で入力してください。"
-        else:
-            new_book = Book(title=title, review=review, rating=int(rating), user_id=current_user.id)
-            db.session.add(new_book)
-            db.session.commit()
-            title = review = rating = ""
-
-    # 検索・フィルター処理（現在のユーザーの投稿のみ表示）
+    # 検索・フィルターの条件を取得
     filter_option = request.args.get("filter", "")
     keyword = request.args.get("keyword", "")
 
+    # 自分の投稿だけ表示
     if filter_option == "my_posts":
-        books = Book.query.filter_by(user_id=current_user.id).all()
+        books = Book.query.filter_by(
+            user_id=current_user.id
+        ).order_by(Book.created_at.desc()).all()
+
+    # キーワード検索
     elif keyword:
         books = Book.query.filter(
             or_(
@@ -52,11 +37,72 @@ def index():
                 Book.review.contains(keyword)
             )
         ).order_by(Book.created_at.desc()).all()
+
+    # すべての投稿を表示
     else:
         books = Book.query.order_by(Book.created_at.desc()).all()
 
-    return render_template("index.html", posts=books, error=error,
-                           input_title=title, input_review=review, input_rating=rating)
+    # 投稿一覧画面を表示
+    return render_template(
+        "index.html",
+        posts=books
+    )
+
+@bp.route("/create", methods=["GET", "POST"])
+@login_required
+def create_post():
+    error = None
+
+    # 検索画面から選択された漫画情報を受け取る
+    title = request.args.get("title", "")
+    author = request.args.get("author", "")
+    thumbnail = request.args.get("thumbnail", "")
+
+    review = ""
+    rating = ""
+
+    # 投稿ボタンが押されたとき
+    if request.method == "POST":
+        title = request.form["title"].strip()
+        review = request.form["review"].strip()
+        rating = request.form["rating"]
+        author = request.form.get("author") or request.args.get("author", "")
+        thumbnail = request.form.get("thumbnail") or request.args.get("thumbnail", "")
+
+        # 入力内容をチェック
+        if not title or not review:
+            error = "タイトルと感想は必須です。"
+
+        elif not rating.isdigit() or not (1 <= int(rating) <= 5):
+            error = "評価は1～5の数字で入力してください。"
+
+        # 問題なければDBへ保存
+        else:
+            new_book = Book(
+                title=title,
+                author=author,
+                thumbnail=thumbnail,
+                review=review,
+                rating=int(rating),
+                user_id=current_user.id
+            )
+
+            db.session.add(new_book)
+            db.session.commit()
+
+            # 投稿後はホームへ戻る
+            return redirect(url_for("main.index"))
+
+    # 投稿画面を表示
+    return render_template(
+        "create_post.html",
+        error=error,
+        input_title=title,
+        input_author=author,
+        input_thumbnail=thumbnail,
+        input_review=review,
+        input_rating=rating
+    )
 
 @bp.route("/delete/<int:id>", methods=["POST"])
 @login_required
@@ -302,12 +348,8 @@ def manga_search():
 
         response = requests.get(url, params=params)
 
-        print("ステータスコード:", response.status_code)
-        print("レスポンス:", response.text[:500])
-
         if response.status_code == 200:
             data = response.json()
-            print("取得件数:", data.get("totalItems"))
 
             for item in data.get("items", []):
                 volume_info = item.get("volumeInfo", {})

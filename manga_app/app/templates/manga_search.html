@@ -108,7 +108,7 @@
 </head>
 <body>
     <div class="container">
-        <a class="back-link" href="/">← 投稿一覧へ戻る</a>
+        <a class="back-link" href="{{ url_for('main.create_post') }}">← 投稿一覧へ戻る</a>
 
         <h1>漫画を検索</h1>
 
@@ -146,7 +146,17 @@
                                 <p>説明文はありません。</p>
                             {% endif %}
 
-                            <a href="#" class="btn">この漫画で投稿する</a>
+                            <a
+                                href="{{ url_for(
+                                    'main.create_post',
+                                    title=book.title,
+                                    author=book.authors,
+                                    thumbnail=book.thumbnail
+                                ) }}"
+                                class="btn"
+                            >
+                                この漫画で投稿する
+                            </a>
                         </div>
                     </div>
                 {% endfor %}
