@@ -34,7 +34,9 @@ PythonのWebフレームワーク「Flask」を使用し、ユーザー登録・
   - いいね数
   - 評価順
 - タイトル・感想検索
-- Google Books APIを利用した漫画検索（実装途中）
+- Google Books APIを利用した漫画検索
+- 検索結果から漫画を選択して投稿
+- 表紙画像・著者情報の取得および保存
 
 ---
 
@@ -63,7 +65,7 @@ PythonのWebフレームワーク「Flask」を使用し、ユーザー登録・
 ### AWS
 
 - AWS Elastic Beanstalk
-- Amazon EC2
+- Amazon EC2（Elastic Beanstalkにより管理）
 - Amazon S3
 - Amazon RDS
 - IAM
@@ -123,7 +125,7 @@ AWS Elastic Beanstalkへ自動デプロイ
 
 ## 画面イメージ
 
-※ スクリーンショットを後日追加予定
+![ホーム画面](images/home_image.png)
 
 ---
 
@@ -172,8 +174,6 @@ flask run
 
 ## 今後の改善予定
 
-- Google Books APIの検索結果を投稿フォームへ自動反映
-- 投稿時に表紙画像・著者情報を自動取得
 - 画像の圧縮・リサイズ対応
 - Docker対応
 - CloudFrontを利用した画像配信
