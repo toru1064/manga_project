@@ -274,6 +274,7 @@
         .author-avatar {
             width: 42px;
             height: 42px;
+            overflow: hidden;
             display: grid;
             place-items: center;
             flex: 0 0 auto;
@@ -283,6 +284,14 @@
             font-size: .9rem;
             font-weight: 900;
             box-shadow: inset 0 0 0 3px rgba(255, 255, 255, .35);
+        }
+
+        .author-avatar-image {
+            width: 100%;
+            height: 100%;
+            display: block;
+            border-radius: 50%;
+            object-fit: cover;
         }
 
         .author-name {
@@ -571,9 +580,19 @@
                         <div class="post-main">
                             <div class="post-meta">
                                 <div class="author-block">
-                                    <span class="author-avatar" aria-hidden="true">
-                                        {{ (post.user.display_name or post.user.username) | first | upper }}
-                                    </span>
+                                    <div class="author-avatar">
+                                        {% if profile_image_urls.get(post.user_id) %}
+                                            <img
+                                                src="{{ profile_image_urls.get(post.user_id) }}"
+                                                alt=""
+                                                class="author-avatar-image"
+                                            >
+                                        {% else %}
+                                            <span aria-hidden="true">
+                                                {{ (post.user.display_name or post.user.username) | first | upper }}
+                                            </span>
+                                        {% endif %}
+                                    </div>
                                     <div class="overflow-hidden">
                                         <a href="{{ url_for('main.user_profile', user_id=post.user.id) }}"
                                            class="author-name">

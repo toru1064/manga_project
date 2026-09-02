@@ -15,6 +15,21 @@ s3 = boto3.client(
 
 S3_BUCKET_NAME = os.environ.get("S3_BUCKET_NAME")
 
+
+def generate_profile_image_url(user):
+    """ユーザーのプロフィール画像を表示するための一時URLを作成する。"""
+    if not user.profile_image:
+        return None
+
+    return s3.generate_presigned_url(
+        "get_object",
+        Params={
+            "Bucket": S3_BUCKET_NAME,
+            "Key": user.profile_image
+        },
+        ExpiresIn=3600
+    )
+
 @bp.route("/", methods=["GET"])
 @login_required
 def index():
@@ -61,11 +76,20 @@ def index():
             error_out=False
         )
 
+    # 投稿者ごとのプロフィール画像URLを作成
+    # 同じユーザーが複数投稿していても、URLは一度だけ作成する
+    profile_image_urls = {}
+
+    for post in pagination.items:
+        if post.user_id not in profile_image_urls:
+            profile_image_urls[post.user_id] = generate_profile_image_url(post.user)
+
     # 投稿一覧画面を表示
     return render_template(
         "index.html",
         posts=pagination.items,
-        pagination=pagination
+        pagination=pagination,
+        profile_image_urls=profile_image_urls
     )
 
 @bp.route("/create", methods=["GET", "POST"])
@@ -267,17 +291,7 @@ def delete_comment(comment_id):
 @bp.route("/profile")
 @login_required
 def profile():
-    profile_image_url = None
-
-    if current_user.profile_image:
-        profile_image_url = s3.generate_presigned_url(
-            "get_object",
-            Params={
-                "Bucket": S3_BUCKET_NAME,
-                "Key": current_user.profile_image
-            },
-            ExpiresIn=3600
-        )
+    profile_image_url = generate_profile_image_url(current_user)
 
     return render_template(
         "profile.html",
@@ -319,18 +333,7 @@ def edit_profile():
 @bp.route("/user/<int:user_id>")
 def user_profile(user_id):
     user = User.query.get_or_404(user_id)
-
-    profile_image_url = None
-
-    if user.profile_image:
-        profile_image_url = s3.generate_presigned_url(
-            "get_object",
-            Params={
-                "Bucket": S3_BUCKET_NAME,
-                "Key": user.profile_image
-            },
-            ExpiresIn=3600
-        )
+    profile_image_url = generate_profile_image_url(user)
 
     return render_template(
         "profile.html",
